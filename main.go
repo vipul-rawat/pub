@@ -13,17 +13,30 @@ func main() {
 	app := gofr.New()
 	app.Server.ValidateHeaders = false
 
+	//create(app, "", "")
 	h := http.New(app)
 
 	app.POST("/events", h.PublishEvent)
+
+	go func() {
+		for {
+			data, err := app.PubSub.Subscribe()
+			if err != nil {
+				app.Logger.Warnf("Error subscribing %v", err)
+				continue
+			}
+
+			app.Logger.Infof("Data %v", data.Value)
+		}
+	}()
 
 	app.Start()
 
 }
 
 func create(app *gofr.Gofr, projectID, topicID string) error {
-	// projectID := "my-project-id"
-	// topicID := "my-topic"
+	projectID = "123456"
+	topicID = "new-customer"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {

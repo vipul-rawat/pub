@@ -17,7 +17,7 @@ func New(app *gofr.Gofr) *Handler {
 
 type NewCustomerEvent struct {
 	CustomerID     int    `json:"customerId"`
-	OrganizationID string `json:"organizationId"`
+	OrganizationID interface{} `json:"organizationId"`
 	ReferralCode   string `json:"referralCode"`
 }
 
