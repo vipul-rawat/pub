@@ -12,11 +12,15 @@ import (
 func main() {
 	app := gofr.New()
 	app.Server.ValidateHeaders = false
+	app.Server.HTTP.Port = 20000
 
 	//create(app, "", "")
 	h := http.New(app)
 
 	app.POST("/events", h.PublishEvent)
+	app.POST("/any", h.Publish)
+
+	//create(app, app.Config.Get("PUBSUB_PROJECT_ID"), app.Config.Get("TOPIC_NAME"))
 
 	go func() {
 		for {
