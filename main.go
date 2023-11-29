@@ -3,16 +3,16 @@ package main
 
 import (
 	"context"
+	"pub/eventhandlers"
 	"pub/http"
 
 	"cloud.google.com/go/pubsub"
-	"developer.zopsmart.com/go/gofr/pkg/gofr"
+	"gofr.dev/pkg/gofr"
 )
 
 func main() {
 	app := gofr.New()
 	app.Server.ValidateHeaders = false
-	app.Server.HTTP.Port = 20000
 
 	//create(app, "", "")
 	h := http.New(app)
@@ -20,27 +20,16 @@ func main() {
 	app.POST("/events", h.PublishEvent)
 	app.POST("/any", h.Publish)
 
-	//create(app, app.Config.Get("PUBSUB_PROJECT_ID"), app.Config.Get("TOPIC_NAME"))
+	// create(app, app.Config.Get("PUBSUB_PROJECT_ID"), app.Config.Get("TOPIC_NAME"))
+	sub := eventhandlers.New(app, app.PubSub)
 
-	go func() {
-		for {
-			data, err := app.PubSub.Subscribe()
-			if err != nil {
-				app.Logger.Warnf("Error subscribing %v", err)
-				continue
-			}
-
-			app.Logger.Infof("Data %v", data.Value)
-		}
-	}()
+	go sub.Start()
 
 	app.Start()
 
 }
 
 func create(app *gofr.Gofr, projectID, topicID string) error {
-	projectID = "123456"
-	topicID = "new-customer"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
